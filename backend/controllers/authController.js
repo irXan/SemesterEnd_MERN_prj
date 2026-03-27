@@ -1,5 +1,5 @@
 import { hash, compare } from "bcrypt";
-import jwt  from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 const createToken = (userId) => {
@@ -11,12 +11,13 @@ const registerUser = async (req, res) => {
     const { fullName, email, password } = req.body;
     const cleanFullName = fullName?.trim();
     const cleanEmail = email?.trim().toLowerCase();
+    const cleanPassword = password?.trim();
 
-    if (!cleanFullName || !cleanEmail || !password) {
+    if (!cleanFullName || !cleanEmail || !cleanPassword) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    if (password.length < 6) {
+    if (cleanPassword.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
@@ -25,7 +26,7 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Email is already registered" });
     }
 
-    const hashedPassword = await hash(password, 10);
+    const hashedPassword = await hash(cleanPassword, 10);
 
     const user = await User.create({
       fullName: cleanFullName,
@@ -44,7 +45,7 @@ const registerUser = async (req, res) => {
         email: user.email,
       },
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Server error while registering user" });
   }
 };
@@ -53,8 +54,9 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     const cleanEmail = email?.trim().toLowerCase();
+    const cleanPassword = password?.trim();
 
-    if (!cleanEmail || !password) {
+    if (!cleanEmail || !cleanPassword) {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
@@ -63,7 +65,7 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const passwordMatches = await compare(password, user.password);
+    const passwordMatches = await compare(cleanPassword, user.password);
     if (!passwordMatches) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
@@ -77,14 +79,15 @@ const loginUser = async (req, res) => {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
+        heightCm: user.heightCm,
+        goal: user.goal,
+        notificationsEnabled: user.notificationsEnabled,
+        reminderTime: user.reminderTime,
       },
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Server error while logging in" });
   }
 };
 
-export {
-  registerUser,
-  loginUser,
-};
+export { registerUser, loginUser };

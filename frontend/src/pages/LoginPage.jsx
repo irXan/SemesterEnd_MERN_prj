@@ -28,7 +28,7 @@ const LoginPage = () => {
 
     const response = await login({
       email: formData.email.trim(),
-      password: formData.password,
+      password: formData.password.trim(),
     });
 
     if (response.ok) {
@@ -86,3 +86,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

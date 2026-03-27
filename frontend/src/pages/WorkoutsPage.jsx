@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import EmptyState from "../components/EmptyState";
 import { useAuth } from "../hooks/useAuth";
 import {
   createWorkout,
@@ -7,6 +8,7 @@ import {
   getWorkouts,
   updateWorkout,
 } from "../services/workoutService";
+import { showError, showSuccess } from "../utils/notify";
 
 const defaultForm = {
   exercise: "",
@@ -23,8 +25,8 @@ const WorkoutsPage = () => {
   const [formData, setFormData] = useState(defaultForm);
   const [editingId, setEditingId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [exerciseFilter, setExerciseFilter] = useState("All");
+  const [dateFilter, setDateFilter] = useState("");
   const [loading, setLoading] = useState(true);
 
   const loadWorkouts = useCallback(async () => {
@@ -32,26 +34,38 @@ const WorkoutsPage = () => {
 
     if (response.ok) {
       setWorkouts(response.data.workouts);
-      setError("");
     } else {
-      setError(response.message);
+      showError(response.message);
     }
 
     setLoading(false);
   }, [token]);
 
-  // We fetch initial list on page load.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     loadWorkouts();
   }, [loadWorkouts]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
+  const exerciseOptions = useMemo(() => {
+    const unique = [...new Set(workouts.map((w) => w.exercise))];
+    return ["All", ...unique];
+  }, [workouts]);
+
   const filteredWorkouts = useMemo(() => {
-    return workouts.filter((workout) =>
-      workout.exercise.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [workouts, searchTerm]);
+    return workouts.filter((workout) => {
+      const matchesSearch = workout.exercise.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesExercise = exerciseFilter === "All" || workout.exercise === exerciseFilter;
+
+      let matchesDate = true;
+      if (dateFilter) {
+        const workoutDate = new Date(workout.workoutDate).toISOString().slice(0, 10);
+        matchesDate = workoutDate === dateFilter;
+      }
+
+      return matchesSearch && matchesExercise && matchesDate;
+    });
+  }, [workouts, searchTerm, exerciseFilter, dateFilter]);
 
   const handleInputChange = (event) => {
     setFormData({
@@ -67,8 +81,6 @@ const WorkoutsPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
-    setMessage("");
 
     const payload = {
       exercise: formData.exercise.trim(),
@@ -86,11 +98,11 @@ const WorkoutsPage = () => {
     }
 
     if (response.ok) {
-      setMessage(editingId ? "Workout updated" : "Workout added");
+      showSuccess(editingId ? "Workout updated" : "Workout added");
       resetForm();
       loadWorkouts();
     } else {
-      setError(response.message);
+      showError(response.message);
     }
   };
 
@@ -113,10 +125,10 @@ const WorkoutsPage = () => {
 
     const response = await deleteWorkout(token, id);
     if (response.ok) {
-      setMessage("Workout deleted");
+      showSuccess("Workout deleted");
       loadWorkouts();
     } else {
-      setError(response.message);
+      showError(response.message);
     }
   };
 
@@ -192,21 +204,35 @@ const WorkoutsPage = () => {
           </div>
         </form>
 
-        {message && <p className="success-text">{message}</p>}
-        {error && <p className="error-text">{error}</p>}
+        <div className="filters-grid">
+          <input
+            type="text"
+            placeholder="Search by exercise..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
 
-        <input
-          type="text"
-          placeholder="Search by exercise..."
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-        />
+          <select value={exerciseFilter} onChange={(event) => setExerciseFilter(event.target.value)}>
+            {exerciseOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+
+          <input type="date" value={dateFilter} onChange={(event) => setDateFilter(event.target.value)} />
+        </div>
 
         {loading ? (
           <p className="helper-text">Loading workouts...</p>
         ) : (
           <div className="list-wrap">
-            {filteredWorkouts.length === 0 && <p className="helper-text">No workouts yet.</p>}
+            {filteredWorkouts.length === 0 && (
+              <EmptyState
+                title="No workouts found"
+                subtitle="Try changing filters or add your first workout."
+              />
+            )}
 
             {filteredWorkouts.map((workout) => (
               <div key={workout._id} className="list-card">

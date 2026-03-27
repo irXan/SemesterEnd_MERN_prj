@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import EmptyState from "../components/EmptyState";
 import { useAuth } from "../hooks/useAuth";
 import {
   createNutritionEntry,
@@ -7,6 +8,7 @@ import {
   getNutritionEntries,
   updateNutritionEntry,
 } from "../services/nutritionService";
+import { showError, showSuccess } from "../utils/notify";
 
 const defaultForm = {
   mealType: "",
@@ -25,8 +27,8 @@ const NutritionPage = () => {
   const [formData, setFormData] = useState(defaultForm);
   const [editingId, setEditingId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [mealFilter, setMealFilter] = useState("All");
+  const [minCalories, setMinCalories] = useState("");
   const [loading, setLoading] = useState(true);
 
   const loadEntries = useCallback(async () => {
@@ -34,26 +36,36 @@ const NutritionPage = () => {
 
     if (response.ok) {
       setEntries(response.data.entries);
-      setError("");
     } else {
-      setError(response.message);
+      showError(response.message);
     }
 
     setLoading(false);
   }, [token]);
 
-  // We fetch initial list on page load.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     loadEntries();
   }, [loadEntries]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
+  const mealOptions = useMemo(() => {
+    const unique = [...new Set(entries.map((e) => e.mealType))];
+    return ["All", ...unique];
+  }, [entries]);
+
   const filteredEntries = useMemo(() => {
-    return entries.filter((entry) =>
-      `${entry.foodName} ${entry.mealType}`.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [entries, searchTerm]);
+    return entries.filter((entry) => {
+      const matchesSearch = `${entry.foodName} ${entry.mealType}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesMeal = mealFilter === "All" || entry.mealType === mealFilter;
+      const matchesCalories =
+        !minCalories || Number(entry.calories) >= Number(minCalories);
+
+      return matchesSearch && matchesMeal && matchesCalories;
+    });
+  }, [entries, searchTerm, mealFilter, minCalories]);
 
   const handleInputChange = (event) => {
     setFormData({
@@ -69,8 +81,6 @@ const NutritionPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
-    setMessage("");
 
     const payload = {
       mealType: formData.mealType.trim(),
@@ -90,11 +100,11 @@ const NutritionPage = () => {
     }
 
     if (response.ok) {
-      setMessage(editingId ? "Nutrition entry updated" : "Nutrition entry added");
+      showSuccess(editingId ? "Nutrition entry updated" : "Nutrition entry added");
       resetForm();
       loadEntries();
     } else {
-      setError(response.message);
+      showError(response.message);
     }
   };
 
@@ -119,10 +129,10 @@ const NutritionPage = () => {
 
     const response = await deleteNutritionEntry(token, id);
     if (response.ok) {
-      setMessage("Nutrition entry deleted");
+      showSuccess("Nutrition entry deleted");
       loadEntries();
     } else {
-      setError(response.message);
+      showError(response.message);
     }
   };
 
@@ -217,21 +227,41 @@ const NutritionPage = () => {
           </div>
         </form>
 
-        {message && <p className="success-text">{message}</p>}
-        {error && <p className="error-text">{error}</p>}
+        <div className="filters-grid">
+          <input
+            type="text"
+            placeholder="Search by food or meal type..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
 
-        <input
-          type="text"
-          placeholder="Search by food or meal type..."
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-        />
+          <select value={mealFilter} onChange={(event) => setMealFilter(event.target.value)}>
+            {mealOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="number"
+            min="0"
+            placeholder="Min calories"
+            value={minCalories}
+            onChange={(event) => setMinCalories(event.target.value)}
+          />
+        </div>
 
         {loading ? (
           <p className="helper-text">Loading nutrition entries...</p>
         ) : (
           <div className="list-wrap">
-            {filteredEntries.length === 0 && <p className="helper-text">No entries yet.</p>}
+            {filteredEntries.length === 0 && (
+              <EmptyState
+                title="No nutrition entries found"
+                subtitle="Try changing filters or add your first meal entry."
+              />
+            )}
 
             {filteredEntries.map((entry) => (
               <div key={entry._id} className="list-card">

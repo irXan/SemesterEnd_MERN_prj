@@ -18,6 +18,25 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    heightCm: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    goal: {
+      type: String,
+      default: "Maintain",
+      trim: true,
+    },
+    notificationsEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    reminderTime: {
+      type: String,
+      default: "08:00",
+      trim: true,
+    },
   },
   {
     timestamps: true,

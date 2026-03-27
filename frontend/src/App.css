@@ -30,6 +30,10 @@ h1 {
   color: #0b2a4a;
 }
 
+h3 {
+  color: #21425f;
+}
+
 .helper-text {
   margin: 0 0 16px;
   color: #4a5d72;
@@ -46,15 +50,20 @@ label {
   margin-bottom: 6px;
 }
 
-input {
+input,
+select,
+textarea {
   border: 1px solid #bccbdb;
   border-radius: 10px;
   padding: 10px 12px;
   margin-bottom: 14px;
   font-size: 15px;
+  font-family: inherit;
 }
 
-input:focus {
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
   border-color: #2b7abf;
   box-shadow: 0 0 0 3px rgba(43, 122, 191, 0.16);
@@ -142,6 +151,18 @@ hr {
   margin-bottom: 10px;
 }
 
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.filters-grid input,
+.filters-grid select {
+  margin-bottom: 0;
+}
+
 .list-wrap {
   display: grid;
   gap: 12px;
@@ -168,6 +189,25 @@ hr {
   background: #b4232a;
 }
 
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.toggle-row input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .auth-card,
   .dashboard-card {
@@ -178,4 +218,23 @@ hr {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+.empty-state {
+  border: 1px dashed #b6c9df;
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+  background: #f7fbff;
+}
+
+.empty-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: #21425f;
+}
+
+.empty-subtitle {
+  margin: 0;
+  color: #4a5d72;
 }

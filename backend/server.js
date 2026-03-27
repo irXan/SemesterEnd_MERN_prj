@@ -4,8 +4,8 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import workoutRoutes from "./routes/workoutRoutes.js";
 import nutritionRoutes from "./routes/nutritionRoutes.js";
+import feedbackRoutes from "./routes/feedbackRoutes.js";
 import "dotenv/config";
-
 
 connectDatabase();
 
@@ -34,6 +34,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/workouts", workoutRoutes);
 app.use("/api/nutrition", nutritionRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });

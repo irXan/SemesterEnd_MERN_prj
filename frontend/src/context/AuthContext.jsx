@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { loginUser, registerUser, getCurrentUser } from "../services/authService";
 
 const AuthContext = createContext(null);
@@ -8,28 +8,31 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadUser = async () => {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      const response = await getCurrentUser(token);
-
-      if (response.ok) {
-        setUser(response.data.user);
-      } else {
-        localStorage.removeItem("token");
-        setToken("");
-        setUser(null);
-      }
-
+  const refreshUser = useCallback(async (authToken = token) => {
+    if (!authToken) {
+      setUser(null);
       setLoading(false);
-    };
+      return;
+    }
 
-    loadUser();
+    const response = await getCurrentUser(authToken);
+
+    if (response.ok) {
+      setUser(response.data.user);
+    } else {
+      localStorage.removeItem("token");
+      setToken("");
+      setUser(null);
+    }
+
+    setLoading(false);
   }, [token]);
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const login = async (formData) => {
     const response = await loginUser(formData);
@@ -58,6 +61,8 @@ export const AuthProvider = ({ children }) => {
       value={{
         token,
         user,
+        setUser,
+        refreshUser,
         loading,
         isAuthenticated: Boolean(token),
         login,
