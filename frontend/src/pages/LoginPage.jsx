@@ -32,7 +32,7 @@ const LoginPage = () => {
     });
 
     if (response.ok) {
-      navigate("/dashboard");
+      navigate("/");
     } else {
       setError(response.message);
     }

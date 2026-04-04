@@ -8,14 +8,17 @@ import NutritionPage from "./pages/NutritionPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import WorkoutsPage from "./pages/WorkoutsPage.jsx";
+import Home from "./pages/Home.jsx"
 import "./App.css";
+import AboutUs from "./pages/Aboutus.jsx";
 
 function App() {
   return (
     <>
       <NotificationManager />
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Home/>} />
+        <Route path="/aboutus" element={<AboutUs/>} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
