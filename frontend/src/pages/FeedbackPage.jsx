@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { createFeedbackItem, getFeedbackItems } from "../services/feedbackService";
 import { showError, showSuccess } from "../utils/notify";
-import { MessageSquare, History, LayoutDashboard, Send, Clock } from "lucide-react"; // Icons added
+import { MessageSquare, History, LayoutDashboard, Send, Clock } from "lucide-react"; 
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 
@@ -23,7 +23,7 @@ const FeedbackPage = () => {
         setFeedbackItems(response.data.feedbackItems || []);
       }
     } catch (error) {
-      showError("History load nahi ho saki.");
+      showError("something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +39,7 @@ const FeedbackPage = () => {
     const response = await createFeedbackItem(token, { subject, message: messageText });
 
     if (response.ok) {
-      showSuccess("Feedback successfully bhej diya gaya!");
+      showSuccess("Feedback Submited!");
       setSubject("");
       setMessageText("");
       loadFeedback();

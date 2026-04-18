@@ -85,7 +85,6 @@ const LoginPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
 
-            {/* Email Field */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-500 tracking-[0.2em] ml-1">
                 Email Address

@@ -54,7 +54,6 @@ const updateWorkout = async (req, res) => {
       return res.status(404).json({ message: "Workout not found" });
     }
 
-    // workout.exercise = exercise ? exercise.trim() : workout.exercise;
     workout.exercise = exercise || workout.exercise;
     workout.sets = sets ? Number(sets) : workout.sets;
     workout.reps = reps ? Number(reps) : workout.reps;

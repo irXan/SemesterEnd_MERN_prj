@@ -100,7 +100,6 @@ const AboutUs = () => {
 
 
         <div className="bg-[#0a0a0a] py-32 text-white overflow-hidden relative">
-          {/* Subtle Background Glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-yellow-500/5 blur-[120px] rounded-full pointer-events-none"></div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
@@ -121,7 +120,6 @@ const AboutUs = () => {
               </p>
               
               <button className="group relative overflow-hidden px-12 py-6 bg-yellow-500 text-black font-black rounded-2xl uppercase tracking-[0.2em] text-xs transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-yellow-500/30 flex items-center gap-3 mx-auto">
-                {/* Shine Effect Animation */}
                 <div className="absolute inset-0 w-full h-full bg-white/20 skew-x-[-25deg] -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out"></div>
                 <span className="relative z-10">Explore Features</span> 
                 <ArrowRight size={18} className="relative z-10 transition-transform duration-300 group-hover:translate-x-2" />
